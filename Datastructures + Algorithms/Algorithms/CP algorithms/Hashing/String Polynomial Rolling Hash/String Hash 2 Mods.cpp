@@ -1,8 +1,9 @@
 #include<bits/stdc++.h>
+#include<array>
 using namespace std;
 
 const int maxn = 2e4 + 1;
-vector<int> mod = { int(1e9 + 7), int(9e8 + 11) };
+array<const int, 2> mod = { int(1e9 + 7), int(9e8 + 11) };
 const int p = 31;
 vector<vector<long long>> pinv;
 vector<vector<long long>> pnorm;
