@@ -1,0 +1,10 @@
+w,h = map(int,input().split())
+u1,d1 = map(int,input().split())
+u2,d2 = map(int,input().split())
+heights = [0]*(h + 1)
+heights[d1] = -u1
+heights[d2] = -u2
+for i in range(h, -1,-1):
+	w += i
+	w = max(0, w + heights[i])
+print(w)
