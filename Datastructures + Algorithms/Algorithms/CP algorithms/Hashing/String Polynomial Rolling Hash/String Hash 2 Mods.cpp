@@ -56,5 +56,5 @@ int substr_hash(vector<int>& prefix_hash, int l, int r, int type) {
 }
 
 int main() {
-	precompute_p(0); precompute_p(1);
+	precompute_p(0), precompute_p(1);
 }
