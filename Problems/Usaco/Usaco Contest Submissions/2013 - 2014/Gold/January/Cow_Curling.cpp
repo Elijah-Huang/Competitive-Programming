@@ -34,7 +34,7 @@ bool cmp(point& a, point& b) {
 	}
 }
 
-/* reorders points so that the first is the bottom left most, and the rest are sorted by
+/* reorders points so that the first is the bottom left most, and the rest are sorted by 
 * counterclockwise angle with the first point as the origin
 */
 void reorder(vector<point>& points) {
@@ -79,10 +79,15 @@ vector<point> c_hull(vector<point>& points) {
 		}
 
 		while (c_hull.size() >= 2 and !sgn(x_prod(points[i], c_hull[c_hull.size() - 2], c_hull[c_hull.size() - 1]))) {
-			c_hull.pop_back();
-		}
+				c_hull.pop_back();
+			}
 		c_hull.push_back(points[i]);
 	}
 
 	return c_hull;
+}
+
+int main() {
+	ios_base::sync_with_stdio(0); cin.tie(0);
+	freopen("curling.in", "r", stdin); freopen("curling.out", "w", stdout);
 }

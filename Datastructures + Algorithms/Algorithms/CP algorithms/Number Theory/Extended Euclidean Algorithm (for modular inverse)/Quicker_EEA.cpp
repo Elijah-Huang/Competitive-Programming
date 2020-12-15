@@ -1,6 +1,7 @@
 #include<iostream>
 using namespace std;
 
+// a^-1 mod m
 long long minv(long long a, long long m) {
     if (a == 1) return 1;
     return m - minv(m % a, a) * m / a;
@@ -14,6 +15,6 @@ long long minva(long long a, long long m) {
 }
 
 int main() {
-    std::cout << minv(38, 69);
+    std::cout << minv(3333, 2017);
 
 }

@@ -66,23 +66,6 @@ void reorder(vector<point>& points) {
 	sort(points.begin(), points.end(), cmp);
 }
 
-vector<point> c_hull(vector<point>& points) {
-	vector<point> c_hull;
-
-	reorder(points);
-
-	c_hull = { points[0] };
-	for (int i = 1; i < points.size(); i++) {
-		// after sort repeated points are adjacent
-		if (points[i].x == points[i - 1].x and points[i].y == points[i - 1].y) {
-			continue;
-		}
-
-		while (c_hull.size() >= 2 and !sgn(x_prod(points[i], c_hull[c_hull.size() - 2], c_hull[c_hull.size() - 1]))) {
-			c_hull.pop_back();
-		}
-		c_hull.push_back(points[i]);
-	}
-
-	return c_hull;
+bool point_in_polygon(vector<point>& points, point& a) {
+	
 }

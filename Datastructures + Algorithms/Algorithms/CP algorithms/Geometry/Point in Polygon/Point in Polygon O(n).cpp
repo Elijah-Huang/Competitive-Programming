@@ -1,3 +1,6 @@
+#include<bits/stdc++.h>
+using namespace std;
+
 struct point {
 	int x, y;
 	bool operator==(const point& b) const {
@@ -8,6 +11,7 @@ struct point {
 struct segment {
 	int x1, x2, y1, y2;
 };
+
 bool intersect(segment a, segment b) {
 
 	//setup x1,y1 as startpoint(leftmost endpoint)
@@ -64,6 +68,6 @@ bool inside_polygon(point& test, vector<point>& polygon) {
 		// the ray you pick should be (x,y) and (x + 1, max y in prob)
 		ans ^= intersect({ v1.x,v2.x,v1.y,v2.y }, { test.x, test.x + 1, test.y, int(1e6) });
 	}
-	return ans;
 
+	return ans;
 }
