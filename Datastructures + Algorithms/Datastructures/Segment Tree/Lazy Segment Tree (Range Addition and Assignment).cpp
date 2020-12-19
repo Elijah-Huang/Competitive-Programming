@@ -8,7 +8,7 @@ struct seg_tree {
     vector<long long> t, lazy_add, lazy_assign;
 
     seg_tree() {}
-    seg_tree(int sz, int element) {
+    seg_tree(int sz, int element = 0) {
         n = sz;
         t.resize(4 * n);
         lazy_add.resize(4 * n, null);

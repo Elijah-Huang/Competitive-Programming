@@ -7,7 +7,7 @@ struct seg_tree {
     vector<long long> t;
 
     seg_tree() {}
-    seg_tree(int sz, int element) {
+    seg_tree(int sz, int element = 0) {
         n = sz;
         t.resize(4 * n);
         vector<int> a(n, element);
@@ -32,22 +32,6 @@ struct seg_tree {
             build(a, 2 * v  + 1, tm + 1, tr);
             t[v] = t[2 * v ] + t[2 * v  + 1];
         }
-    }
-
-    long long sum(int l, int r) {
-        return sum(l, r, 1, 0, n - 1);
-    }
-    long long sum(int l, int r, int v, int tl, int tr) {
-        if (l > r) {
-            return 0ll;
-        }
-
-        if (l == tl and r == tr) {
-            return t[v];
-        }
-
-        int tm = (tl + tr) / 2;
-        return sum(l, min(r, tm), 2 * v , tl, tm) + sum(max(l, tm + 1), r, 2 * v  + 1, tm + 1, tr);
     }
 
     void assign(int idx, long long new_val) {
@@ -88,5 +72,21 @@ struct seg_tree {
 
             t[v] = t[2 * v ] + t[2 * v  + 1];
         }
+    }
+
+    long long sum(int l, int r) {
+        return sum(l, r, 1, 0, n - 1);
+    }
+    long long sum(int l, int r, int v, int tl, int tr) {
+        if (tr < l or r < tl) {
+            return 0ll;
+        }
+
+        if (l <= tl and tr <= r) {
+            return t[v];
+        }
+
+        int tm = (tl + tr) / 2;
+        return sum(l, r, 2 * v, tl, tm) + sum(l, r, 2 * v + 1, tm + 1, tr);
     }
 };

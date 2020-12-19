@@ -3,7 +3,7 @@ using namespace std;
 
 // change all long long to double for real value coordinates
 
-const double eps = 1e-7;
+const double eps = 1e-10;
 
 struct point {
 	long long x, y;
@@ -16,7 +16,7 @@ long long x_prod(point& a, point& b, point& c) {
 }
 
 bool sgn(long long val) {
-	if (abs(val) < eps) {
+	if (abs(val) < sqrt(eps)) {
 		return 1;
 	}
 	else {
@@ -24,7 +24,7 @@ bool sgn(long long val) {
 	}
 }
 
-bool cmp(point& a, point& b) {
+bool cmp(const point& a, const point& b) {
 	// points with the same angle(cos) need to be processed in a certain order
 	if (abs(a.cos - b.cos) < eps) {
 		return a.x < b.x;
@@ -67,5 +67,23 @@ void reorder(vector<point>& points) {
 }
 
 bool point_in_polygon(vector<point>& points, point& a) {
-	
+	if (!sgn(x_prod(points[1], a, points[0]))) {
+		return false;
+	}
+
+	int l = 1; int r = points.size() - 2;
+	while (l != r) {
+		int m = (l + r + 1) / 2;
+		if (sgn(x_prod(points[m], a, points[0]))) {
+			l = m;
+		}
+		else {
+			r = m - 1;
+		}
+	}
+
+	return (abs(x_prod(points[l], points[l + 1], points[0])) -
+		abs(x_prod(points[0], points[l], a)) +
+		abs(x_prod(points[l], points[l + 1], a)) +
+		abs(x_prod(points[l + 1], points[0], a))) < sqrt(eps);
 }
