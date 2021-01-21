@@ -4,8 +4,8 @@ using namespace std;
 struct seg_tree {
 
     int n;
-    long long null = -(1ll << 62);
-    vector<long long> t, lazy_add, lazy_assign;
+    int null = -(1 << 30);
+    vector<int> t, lazy_add, lazy_assign;
 
     seg_tree() {}
     seg_tree(int sz, int element = 0) {
@@ -35,7 +35,7 @@ struct seg_tree {
             int tm = (tl + tr) / 2;
             build(a, 2 * v, tl, tm);
             build(a, 2 * v + 1, tm + 1, tr);
-            t[v] = t[2 * v] + t[2 * v + 1];
+            t[v] = max(t[2 * v], t[2 * v + 1]);
         }
     }
 
@@ -43,13 +43,14 @@ struct seg_tree {
     * its children. In order for the seg tree to be a valid representation, if either v or its
     * children are going to be used, propagate must be called on v to propagate the updates
     * down to be used to properly set the value of all nodes that are going to be used,
-    * whether this be updating lazy for that node or using its value for get(), sum() etc.
-    * 
+    * whether this be updating lazy for that node or using its value for get(), mx(), or
+    * calculating values of nodes that partially contain the range update for range_assign, etc.
+    *
     * At most 1 of lazy_assign[v] or lazy_add[v] represent a pending update
     */
     void propagate(int v, int tl, int tr) {
         if (lazy_assign[v] != null) {
-            t[v] = (tr - tl + 1) * lazy_assign[v];
+            t[v] = lazy_assign[v];
 
             if (tl != tr) {
                 lazy_add[2 * v] = lazy_add[2 * v + 1] = null;
@@ -58,17 +59,17 @@ struct seg_tree {
             lazy_assign[v] = null;
         }
         else if (lazy_add[v] != null) {
-            t[v] += (tr - tl + 1) * lazy_add[v];
+            t[v] += lazy_add[v];
 
             if (tl != tr) {
                 if (lazy_assign[2 * v] != null) {
-                    lazy_assign[2 * v] = (lazy_assign[2 * v] == null ? lazy_add[v] : lazy_assign[2 * v] + lazy_add[v]);
+                    lazy_assign[2 * v] = lazy_assign[2 * v] + lazy_add[v];
                 }
                 else {
                     lazy_add[2 * v] = (lazy_add[2 * v] == null ? lazy_add[v] : lazy_add[2 * v] + lazy_add[v]);
                 }
                 if (lazy_assign[2 * v + 1] != null) {
-                    lazy_assign[2 * v + 1] = (lazy_assign[2 * v + 1] == null ? lazy_add[v] : lazy_assign[2 * v + 1] + lazy_add[v]);
+                    lazy_assign[2 * v + 1] = lazy_assign[2 * v + 1] + lazy_add[v];
                 }
                 else {
                     lazy_add[2 * v + 1] = (lazy_add[2 * v + 1] == null ? lazy_add[v] : lazy_add[2 * v + 1] + lazy_add[v]);
@@ -78,10 +79,10 @@ struct seg_tree {
         }
     }
 
-    void assign(int idx, long long new_val) {
+    void assign(int idx, int new_val) {
         assign(idx, new_val, 1, 0, n - 1);
     }
-    void assign(int idx, long long new_val, int v, int tl, int tr) {
+    void assign(int idx, int new_val, int v, int tl, int tr) {
         propagate(v, tl, tr);
 
         if (tl == tr) {
@@ -99,14 +100,14 @@ struct seg_tree {
                 assign(idx, new_val, 2 * v + 1, tm + 1, tr);
             }
 
-            t[v] = t[2 * v] + t[2 * v + 1];
+            t[v] = max(t[2 * v], t[2 * v + 1]);
         }
     }
 
-    void add(int idx, long long added_val) {
+    void add(int idx, int added_val) {
         add(idx, added_val, 1, 0, n - 1);
     }
-    void add(int idx, long long added_val, int v, int tl, int tr) {
+    void add(int idx, int added_val, int v, int tl, int tr) {
         propagate(v, tl, tr);
 
         if (tl == tr) {
@@ -124,7 +125,7 @@ struct seg_tree {
                 assign(idx, added_val, 2 * v + 1, tm + 1, tr);
             }
 
-            t[v] = t[2 * v] + t[2 * v + 1];
+            t[v] = max(t[2 * v], t[2 * v + 1]);
         }
     }
 
@@ -154,7 +155,7 @@ struct seg_tree {
         * because the entire range must be updated and so we can easily set the
         * node properly with just information from lazy[] and propagate the changes
         */
-        t[v] = t[2 * v] + t[2 * v + 1];
+        t[v] = max(t[2 * v], t[2 * v + 1]);
     }
 
     void range_add(int l, int r, int added_val) {
@@ -178,13 +179,13 @@ struct seg_tree {
         range_add(l, r, added_val, 2 * v, tl, tm);
         range_add(l, r, added_val, 2 * v + 1, tm + 1, tr);
 
-        t[v] = t[2 * v] + t[2 * v + 1];
+        t[v] = max(t[2 * v], t[2 * v + 1]);
     }
 
-    long long get(int idx) {
+    int get(int idx) {
         return get(idx, 1, 0, n - 1);
     }
-    long long get(int idx, int v, int tl, int tr) {
+    int get(int idx, int v, int tl, int tr) {
         propagate(v, tl, tr);
 
         if (tl == tr) {
@@ -201,12 +202,12 @@ struct seg_tree {
         }
     }
 
-    long long sum(int l, int r) {
-        return sum(l, r, 1, 0, n - 1);
+    int mx(int l, int r) {
+        return mx(l, r, 1, 0, n - 1);
     }
-    long long sum(int l, int r, int v, int tl, int tr) {
+    int mx(int l, int r, int v, int tl, int tr) {
         if (tr < l or r < tl) {
-            return 0ll;
+            return 0;
         }
 
         propagate(v, tl, tr);
@@ -216,6 +217,6 @@ struct seg_tree {
         }
 
         int tm = (tl + tr) / 2;
-        return sum(l, r, 2 * v, tl, tm) + sum(l, r, 2 * v + 1, tm + 1, tr);
+        return max(mx(l, r, 2 * v, tl, tm), mx(l, r, 2 * v + 1, tm + 1, tr));
     }
 };
