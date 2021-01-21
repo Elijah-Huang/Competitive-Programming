@@ -22,6 +22,7 @@ void dfs_hld(int curr, int parent) {
 	tin[curr] = t++;
 	for (auto& neighbor : adj[curr]) {
 		if (neighbor == parent) continue;
+		// top_segment[a] == a if a is not part of a collection of heavy edges otherwise == the highest node in the collection
 		top_segment[neighbor] = (neighbor == adj[curr][0] ? top_segment[curr] : neighbor);
 		dfs_hld(neighbor, curr);
 	}

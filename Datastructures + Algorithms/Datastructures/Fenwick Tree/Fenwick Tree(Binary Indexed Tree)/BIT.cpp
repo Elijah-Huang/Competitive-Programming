@@ -4,39 +4,41 @@ using namespace std;
 struct bit {
 
 	int n;
-	vector<int> a;
-	vector<int> a2;
+	vector<int> b;
+	vector<long long> a;
 
 	bit() {}
-	bit(int n2, int val) {
+	bit(int n2, int val = 0) {
 		n = n2 + 1;
 		a.resize(n);
-		a2 = vector<int>(n, val);
+		b = vector<int>(n, val);
 		if (val) {
 			for (int i = 0; i < n2; i++) {
 				add(i, val);
 			}
 		}
 	}
-	bit(vector<int>& b) {
-		n = b.size() + 1;
+	bit(vector<int>& b2) {
+		n = b2.size() + 1;
 		a.resize(n);
-		a2 = b;
+		b = b2;
 		for (int i = 0; i < b.size(); i++) {
 			add(i, b[i]);
 		}
 	}
 
 	void add(int idx, int val) {
+		b[idx] += val;
 		for (idx++; idx < n; idx += idx & -idx) {
 			a[idx] += val;
 		}
 	}
 
-	void update(int idx, int val) {
+	void assign(int idx, int val) {
 		int val2 = val;
-		val -= a2[idx];
-		a2[idx] = val2;
+		val -= b[idx];
+		b[idx] = val2;
+
 		add(idx, val);
 	}
 
@@ -45,6 +47,7 @@ struct bit {
 		for (idx++; idx > 0; idx -= idx & -idx) {
 			tot += a[idx];
 		}
+
 		return tot;
 	}
 

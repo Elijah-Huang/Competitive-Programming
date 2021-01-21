@@ -3,7 +3,7 @@ using namespace std;
 
 // change all long long to double for real value coordinates
 
-const double eps = 1e-7;
+const double eps = 1e-10;
 
 struct point {
 	long long x, y;
@@ -16,7 +16,7 @@ long long x_prod(point& a, point& b, point& c) {
 }
 
 bool sgn(long long val) {
-	if (abs(val) < eps) {
+	if (abs(val) < sqrt(eps)) {
 		return 1;
 	}
 	else {
@@ -24,7 +24,7 @@ bool sgn(long long val) {
 	}
 }
 
-bool cmp(point& a, point& b) {
+bool cmp(const point& a, const point& b) {
 	// points with the same angle(cos) need to be processed in a certain order
 	if (abs(a.cos - b.cos) < eps) {
 		return a.x < b.x;
@@ -78,16 +78,64 @@ vector<point> c_hull(vector<point>& points) {
 			continue;
 		}
 
-		while (c_hull.size() >= 2 and !sgn(x_prod(points[i], c_hull[c_hull.size() - 2], c_hull[c_hull.size() - 1]))) {
-				c_hull.pop_back();
-			}
+		while (c_hull.size() >= 2 and (!sgn(x_prod(points[i], c_hull[c_hull.size() - 2], c_hull[c_hull.size() - 1]))
+			or x_prod(points[i], c_hull[c_hull.size() - 2], c_hull[c_hull.size() - 1]) == 0)) {
+			c_hull.pop_back();
+		}
 		c_hull.push_back(points[i]);
 	}
 
 	return c_hull;
 }
 
+bool point_in_polygon(vector<point>& points, point& a) {
+	if (points.size() == 2) {
+		return x_prod(points[1], a, points[0]) == 0 and points[0].x <= a.x and a.x <= points[1].x and points[0].y <= a.y and a.y <= points[1].y;
+	}
+
+	if (!sgn(x_prod(points[1], a, points[0]))) {
+		return false;
+	}
+
+	int l = 1; int r = points.size() - 2;
+	while (l != r) {
+		int m = (l + r + 1) / 2;
+		if (sgn(x_prod(points[m], a, points[0]))) {
+			l = m;
+		}
+		else {
+			r = m - 1;
+		}
+	}
+	
+	return abs(abs(x_prod(points[l], points[l + 1], points[0])) -
+		(abs(x_prod(points[0], points[l], a)) +
+		abs(x_prod(points[l], points[l + 1], a)) +
+		abs(x_prod(points[l + 1], points[0], a)))) < eps;
+}
+
 int main() {
 	ios_base::sync_with_stdio(0); cin.tie(0);
 	freopen("curling.in", "r", stdin); freopen("curling.out", "w", stdout);
+	int n; cin >> n;
+
+	vector<vector<point>> teams(2, vector<point>(n)), c_hulls(2);
+	for (int t = 0; t <= 1; t++) {
+		for (int i = 0; i < n; i++) {
+			cin >> teams[t][i].x >> teams[t][i].y;
+		}
+
+		c_hulls[t] = c_hull(teams[t]);
+	}
+
+	for (int t = 0; t <= 1; t++) {
+		int ans = 0;
+		for (auto& p : teams[t ^ 1]) {
+			if (point_in_polygon(c_hulls[t], p)) {
+				ans++;
+			}
+		}
+
+		cout << ans << " \n"[t];
+	}
 }
