@@ -1,50 +1,74 @@
 #include<bits/stdc++.h>
 using namespace std;
 
-void topdfs(int curr, vector<bool>& visited, vector<vector<int>>& adj, stack<int>& topsort) {
-	visited[curr] = 1;
-	for (auto neighbor : adj[curr]) {
-		if (!visited[neighbor]) {
-			topdfs(neighbor, visited, adj, topsort);
+const int maxn = 1e5 + 1;
+int n, m;
+// 0 -> normal 1 -> transposed | compressed -> graph where scc's are nodes
+vector<int> adj[2][maxn], compressed_adj[2][maxn];
+bool visited[maxn]; // for topological sort
+stack<int> s;
+// sccs[i] -> nodes in ith scc
+vector<vector<int>> sccs(1);
+int node_to_scc[maxn];
+
+void dfs_top(int c) {
+	visited[c] = 1;
+
+	for (auto n : adj[0][c]) {
+		if (!visited[n]) {
+			dfs_top(n);
 		}
 	}
-	topsort.push(curr);
+
+	s.push(c);
 }
 
-void flooddfs(int curr, vector<int>& comp, vector<vector<int>>& radj, int& curr_comp) {
-	comp[curr] = curr_comp;
-	for (auto neighbor : radj[curr]) {
-		if (comp[neighbor] == 0) {
-			flooddfs(neighbor, comp, radj, curr_comp);
+void dfs_scc(int c) {
+	node_to_scc[c] = sccs.size() - 1;
+	sccs.back().push_back(c);
+
+	for (auto n : adj[1][c]) {
+		if (!node_to_scc[n]) {
+			dfs_scc(n);
 		}
 	}
 }
 
 int main() {
-	ios_base::sync_with_stdio(0); cin.tie(0);
-	int n, m, curr_comp = 0;
+	cin.tie(0)->sync_with_stdio(0);
+
 	cin >> n >> m;
-	vector<vector<int>> adj(n), radj(n);
-	vector<int> comp(n);
-	stack<int> topsort;
-	vector<bool> visited(n);
-	for (int i = 0; i < m; i++) {
-		int u, v;
-		cin >> u >> v; u--; v--;
-		adj[u].push_back(v);
-		radj[v].push_back(u);
+
+	// set up adj list
+	while (m--) {
+		int a, b; cin >> a >> b;
+		adj[0][a].push_back(b);
+		adj[1][b].push_back(a);
 	}
-	for (int i = 0; i < n; i++) {
-		if (visited[i] == 0) {
-			topdfs(i, visited, adj, topsort);
+
+	// topological sort
+	for (int i = 1; i <= n; i++) {
+		if (!visited[i]) {
+			dfs_top(i);
 		}
 	}
-	while (!topsort.empty()) {
-		int curr = topsort.top();
-		topsort.pop();
-		if (comp[curr] == 0) {
-			curr_comp++;
-			flooddfs(curr, comp, radj, curr_comp);
+
+	// find sccs
+	while (!s.empty()) {
+		if (!node_to_scc[s.top()]) {
+			sccs.resize(sccs.size() + 1);
+			dfs_scc(s.top());
+		}
+
+		s.pop();
+	}
+
+	// compress graph
+	for (int i = 1; i <= n; i++) {
+		for (int j = 0; j < 2; j++) {
+			for (auto n : adj[j][i]) {
+				compressed_adj[j][node_to_scc[i]].push_back(node_to_scc[n]);
+			}
 		}
 	}
 }
