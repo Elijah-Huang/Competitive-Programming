@@ -1,5 +1,5 @@
 maxn = 10 ** 7
-spf = [0] * maxn
+spf = [0] * (maxn+1)
 primes = []
 
 # linear sieve
