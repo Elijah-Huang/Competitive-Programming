@@ -1,17 +1,27 @@
 import sys
 input = sys.stdin.buffer.readline
+def print(val):
+    sys.stdout.write(str(val) + '\n')
 
-maxn = 2*10 ** 7 + 1
+maxn = 2*10 ** 7
 whyistimelimitsotight = {}
-pairs = [0] * maxn
-spf = [0] * maxn
+pairs = [0] * (maxn+1)
+spf = [0] * (maxn+1)
+primes = []
 
-for i in range(2, maxn):
+for i in range(2, maxn+1):
     if spf[i] == 0:
-        for j in range(i, maxn, i):
-            pairs[j] += 1
-            if spf[j] == 0:
-                spf[j] = i
+        spf[i] = i
+        primes.append(i)
+
+    j = 0
+    while j < len(primes) and primes[j] <= spf[i] and primes[j]*i <= maxn:
+        spf[primes[j]*i] = primes[j]
+        j += 1
+
+for i in range(2,maxn+1):
+    prev = i//spf[i]
+    pairs[i] += pairs[prev] + (spf[prev] != spf[i])
 
 def divisors(n):
     pf = []
@@ -21,7 +31,7 @@ def divisors(n):
         else:
             pf[-1][1] += 1
 
-        n//= spf[n]
+        n //= spf[n]
 
     divs = [1]
     for prime, count in pf:
