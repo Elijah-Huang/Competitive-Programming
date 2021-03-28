@@ -1,3 +1,5 @@
+// O(E*log(E)) good for sparse graphs
+// optimized via not pushing new nodes if dist is greater and breaking if all nodes have been visited
 #include<bits/stdc++.h>
 using namespace std;
 
@@ -9,7 +11,7 @@ vector<long long> dijkstra_pq(int start) {
 	dist[start] = 0;
 	priority_queue<tuple<long long, int>, vector<tuple<long long, int>>, greater<tuple<long long, int>>> pq;
 	vector<bool> visited(n + 1);
-	long long d, new_d; int node;
+	long long d, new_d; int node, tot_vis = 0;
 
 	pq.push({ 0,start });
 	while (!pq.empty()) {
@@ -17,6 +19,9 @@ vector<long long> dijkstra_pq(int start) {
 
 		if (!visited[node]) {
 			visited[node] = 1;
+			if (++tot_vis == n) {
+				break;
+			}
 
 			for (auto& [neighbor, w] : adj[node]) {
 				new_d = d + w;

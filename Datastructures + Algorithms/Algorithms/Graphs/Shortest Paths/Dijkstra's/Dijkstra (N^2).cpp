@@ -1,3 +1,4 @@
+// O(n^2) good for dense graphs
 #include<bits/stdc++.h>
 using namespace std;
 
