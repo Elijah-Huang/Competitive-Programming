@@ -7,80 +7,49 @@ const double eps = 1e-10;
 
 struct point {
 	long long x, y;
-	double cos;
 };
 
-// c->a cross c->b 
+// c->a X c->b
 long long x_prod(point& a, point& b, point& c) {
-	return ((a.x - c.x) * (b.y - c.y) - (b.x - c.x) * (a.y - c.y));
+	return (a.x - c.x) * (b.y - c.y) - (b.x - c.x) * (a.y - c.y);
 }
 
-bool sgn(long long val) {
-	if (abs(val) < sqrt(eps)) {
+// return 0 if a < 0 else 1
+bool sgn(long long a) {
+	if (abs(a) < sqrt(eps)) {
 		return 1;
 	}
-	else {
-		return val > 0;
-	}
+	return a > 0;
 }
 
-bool cmp(const point& a, const point& b) {
-	// points with the same angle(cos) need to be processed in a certain order
-	if (abs(a.cos - b.cos) < eps) {
-		return a.x < b.x;
-	}
-	else {
-		return a.cos > b.cos;
-	}
-}
-
-/* reorders points so that the first is the bottom left most, and the rest are sorted by
-* counterclockwise angle with the first point as the origin
-*/
+/* reorders points so that the first is the bottom left most, and the rest are sorted by ccw angle with the first point as the origin
+O(nlogn) */
 void reorder(vector<point>& points) {
-	point leftmost;
+	// make bottom left point first point
+	swap(points[0], *min_element(points.begin(), points.end(),
+		[&](point& a, point& b) {return a.y < b.y or a.y == b.y and a.x < b.x; }));
 
-	int lowest = 1 << 30;
-	for (point& p : points) {
-		if (p.y < lowest) {
-			leftmost = p;
-			lowest = p.y;
-		}
-		else if (p.y == lowest) {
-			if (p.x < leftmost.x) {
-				leftmost = p;
-			}
-		}
-	}
-
-	for (point& p : points) {
-		if (p.x == leftmost.x and p.y == leftmost.y) {
-			p.cos = 2;
-		}
-		else {
-			long long x = p.x - leftmost.x, y = p.y - leftmost.y;
-			p.cos = (x / sqrt(x * x + y * y));
-		}
-	}
-
-	sort(points.begin(), points.end(), cmp);
+	// sort counterclockwise so that points with same cos are processed in correct order -> increasing x 
+	sort(points.begin() + 1, points.end(),
+		[&](point& a, point& b) {long long x = x_prod(a, b, points[0]); return x > 0 ? 1 : x == 0 and a.x < b.x; });
 }
 
-vector<point> c_hull(vector<point>& points) {
-	vector<point> c_hull;
-
+// graham scan O(nlogn)
+vector<point> generate_c_hull(vector<point>& points) {
 	reorder(points);
 
-	c_hull = { points[0] };
+	vector<point> c_hull{ points[0] };
 	for (int i = 1; i < points.size(); i++) {
 		// after sort repeated points are adjacent
 		if (points[i].x == points[i - 1].x and points[i].y == points[i - 1].y) {
 			continue;
 		}
 
-		while (c_hull.size() >= 2 and !sgn(x_prod(points[i], c_hull[c_hull.size() - 2], c_hull[c_hull.size() - 1]))) {
+		// if you have to turn clockwise to add point i, remove the previous point
+		while (c_hull.size() >= 2 and !sgn(x_prod(points[i], c_hull[c_hull.size() - 2], c_hull.back()))) {
 			c_hull.pop_back();
 		}
+
 		c_hull.push_back(points[i]);
 	}
 
