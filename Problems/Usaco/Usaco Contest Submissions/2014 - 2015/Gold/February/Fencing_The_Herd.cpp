@@ -1,4 +1,7 @@
 // O( (n+Q1/2)*logn * Q1/(block_size) + Q2*(log(n) + block_size/2) ) -> (assume Q1==Q2) min = 1.13e8 at x = 2258
+// The actual best block size is about 6400 (500 ms) because recomputing the convex hull has decent constant factor
+// Somewhat humorously, because of weak test data as long as the initial points are put in a hull, 
+// not recomputing the hull takes 1150 ms (ofc worst case is (q/2)^2 which is tle)
 #include<bits/stdc++.h>
 using namespace std;
 
@@ -13,7 +16,7 @@ vector<point> points;
 vector<point> buffer_points;
 vector<point>& c_hull = points;
 // process queries in ~ sqrt(n) blocks -> don't have to reupdate the convex hull but runtime is ~ n^3/2
-int b_sz = 2258;
+int b_sz = 6400;
 long long a, b, c;
 
 // c->a X c->b
@@ -105,7 +108,9 @@ int find_y(vector<point>& c_hull, bool mn, bool pr = 0) {
 		y.y = -y.y;
 	}
 
-	// this is to handle the neg consecutive at beginning and lump it into the pos consecutive so we can bin search
+	// this is to handle the dec consecutive at beginning and lump it into the inc consecutive so we can bin search
+	// also to handle the inc consecutive from beg and before beg via removing the inc consecutive before beg
+	// (binary search can end up at c_hull.size()-1 when it should be at the end of the inc consecutive from beg)
 	y.x += c_hull[n].x, y.y += c_hull[n].y;
 	bool dec_consecutive_at_begin = mn ^ sgn(x_prod(c_hull[0], y, c_hull[n]));
 	y.x -= c_hull[n].x, y.y -= c_hull[n].y;
@@ -133,34 +138,7 @@ int find_y(vector<point>& c_hull, bool mn, bool pr = 0) {
 			r = m - 1;
 		}
 	}
-	
-	/*if (pr) {
-		long long best = -1, amt;
-		if (mn) {
-			amt = 1ll << 62;
-		}
-		else {
-			amt = -(1ll << 62);
-		}
 
-		for (int i = 0; i < c_hull.size(); i++) {
-			if (mn ^ (c_hull[i].x * a + c_hull[i].y * b > amt)) {
-				amt = c_hull[i].x * a + c_hull[i].y * b;
-				best = i;
-			}
-		}
-
-		int m = l;
-		cout << m << ' ' << n << ' ' << dec_consecutive_at_begin << '\n';
-		int m_prev = m == 0 ? n : m - 1;
-		point y_scaled = { y.x + c_hull[m_prev].x, y.y + c_hull[m_prev].y };
-		cout << "MAKING SURE FIND IS RIGHT " << l << ' ' << best << ' ' << (mn ^ sgn(x_prod(y_scaled, c_hull[m], c_hull[m_prev]))) << '\n';
-		cout << c_hull[m].x - c_hull[m_prev].x << ' ' << c_hull[m].y - c_hull[m_prev].y << ' ' << y.x << ' ' << y.y << ' ' << x_prod(y_scaled, c_hull[m], c_hull[m_prev]) << '\n';
-		m = (l+1)%(n+1);
-		m_prev = m == 0 ? n : m - 1;
-		y_scaled = { y.x + c_hull[m_prev].x, y.y + c_hull[m_prev].y };
-		cout << (mn ^ sgn(x_prod(y_scaled, c_hull[m], c_hull[m_prev]))) << '\n';
-	}*/
 	return point_test(c_hull[l]);
 }
 
@@ -173,7 +151,7 @@ int hull_test(vector<point>& c_hull) {
 	else {
 		a = point_test(c_hull[0]), b = point_test(c_hull.back());
 	}
-	//cout << a << ' ' << b << '\n';
+
 	if (a == b and a != 2) {
 		return a;
 	}
@@ -186,21 +164,10 @@ int main() {
 	cin.tie(0)->sync_with_stdio(0);
 	freopen("fencing.in", "r", stdin); freopen("fencing.out", "w", stdout);
 	
-	/*vector<string> ans;
-	ifstream fin("8.out");
-	string egg; int ansi = 0;
-	while (fin >> egg) {
-		ans.push_back(egg);
-	}
-	fin.close();
-
-	freopen("8.in", "r", stdin); */
-	
 	cin >> n >> q;
 	
 	for (int i = 0; i < n; i++) {
 		int a, b; cin >> a >> b;
-		//cout << a << ' ' << b << '\n';
 		points.push_back({ a,b });
 	}
 	c_hull = generate_c_hull(points);
@@ -218,7 +185,6 @@ int main() {
 
 		if (t == 1) {
 			int x, y; cin >> x >> y;
-			//cout << x << ' ' << y << '\n';
 			buffer_points.push_back({ x,y });
 		}
 		else {
@@ -233,19 +199,9 @@ int main() {
 
 			if (above != 2) {
 				cout << "YES\n";
-				/*if (ans[ansi] != "YES") {
-					cout << "YES " << ' ' << ans[ansi] << ' ' << (ans[ansi] == "YES") << '\n';
-					cout << buffer_points.size() << ' ' << above << ' ' << hull_test(c_hull) << ' ' << find_y(c_hull, 0, 1) << ' ' << find_y(c_hull, 1, 1) << '\n';
-				}
-				ansi++;*/
 			}
 			else {
 				cout << "NO\n";
-				/*if (ans[ansi] != "NO") {
-					cout << "NO " << ' ' << ans[ansi] << ' ' << (ans[ansi] == "NO") << '\n';
-					cout << buffer_points.size() << ' ' << above << ' ' << hull_test(c_hull) << ' ' << find_y(c_hull, 0, 1) << ' ' << find_y(c_hull, 1, 1) << '\n';
-				}
-				ansi++;*/
 			}
 			
 		}
