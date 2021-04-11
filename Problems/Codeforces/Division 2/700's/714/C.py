@@ -1,4 +1,3 @@
-# O(t*log(n)*m)
 import sys
 
 input = sys.stdin.buffer.readline
