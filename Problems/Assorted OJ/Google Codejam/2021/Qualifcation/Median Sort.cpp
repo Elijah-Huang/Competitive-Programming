@@ -11,5 +11,4 @@ int main() {
 	for (int cas = 1; cas <= t; cas++) {
 		cout << "Case #" << cas << ": " << ;
 	}
-
 }
