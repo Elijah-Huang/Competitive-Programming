@@ -1,29 +1,42 @@
-vector<int> parent;
-vector<int> sizes;
-int sets = 0;
+#include<bits/stdc++.h>
+using namespace std;
 
-void make_set(int& v) {
-	parent[v] = v;
-	sizes[v] = 1;
-	sets++;
-}
+struct DSU {
+	int n;
+	vector<int> parent;
+	vector<int> sizes;
 
-int find_set(int v) {
-	if (parent[v] == v) {
-		return v;
+	DSU() {}
+	DSU(int n) {
+		this->n = n;
+		parent.resize(n + 1);
+		iota(parent.begin(), parent.end(), 0);
+		sizes.resize(n + 1);
+		fill(sizes.begin(), sizes.end(), 1);
 	}
-	return parent[v] = find_set(parent[v]);
-}
 
-void union_sets(int a, int b) {
-	a = find_set(a);
-	b = find_set(b);
-	if (a != b) {
-		if (sizes[a] < sizes[b]) {
-			swap(a, b);
+	int find_parent(int x) {
+		if (parent[x] == x) {
+			return x;
 		}
-		parent[b] = a;
-		sizes[a] += sizes[b];
-		sets--;
+		return parent[x] = find_parent(parent[x]);
 	}
-}
+
+	bool union_sets(int a, int b) {
+		a = find_parent(a);
+		b = find_parent(b);
+
+		if (a != b) {
+			if (sizes[a] < sizes[b]) {
+				swap(a, b);
+			}
+
+			parent[b] = a;
+			sizes[a] += sizes[b];
+
+			return 1;
+		}
+
+		return 0;
+	}
+};
