@@ -66,8 +66,10 @@ int main() {
 	// compress graph
 	for (int i = 1; i <= n; i++) {
 		for (int j = 0; j < 2; j++) {
-			for (auto n : adj[j][i]) {
-				compressed_adj[j][node_to_scc[i]].push_back(node_to_scc[n]);
+			for (auto ne : adj[j][i]) {
+				if (node_to_scc[i] != node_to_scc[ne]) {
+					compressed_adj[j][node_to_scc[i]].push_back(node_to_scc[ne]);
+				}
 			}
 		}
 	}
