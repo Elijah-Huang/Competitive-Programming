@@ -1,4 +1,4 @@
-# O(n^2*m)
+# O(n^2 * m)
 import sys
 input = sys.stdin.buffer.readline
 
