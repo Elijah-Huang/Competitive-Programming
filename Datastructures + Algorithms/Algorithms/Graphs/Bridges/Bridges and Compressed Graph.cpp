@@ -5,8 +5,8 @@ const int maxn = 1e5 + 1;
 
 int n, m;
 vector<int> adj[2][maxn]; // adj[0] is the normal graph 
-// adj[1] is the graph where nodes are connected components if bridges are removed 
-// and the only edges are bridges
+/* adj[1] is the graph where nodes are connected components if bridges are removed 
+and the only edges are bridges. Guaranteed to be a forest*/
 
 // for finding bridges
 int t = 1;
@@ -64,7 +64,8 @@ void dfs_comp(int c)
 
 	for (auto ne : adj[0][c])
 	{
-		if (comp[ne] == 0 and not bridges.count({ c,ne }) and not bridges.count({ ne,c })) {
+		if (comp[ne] == 0 and not bridges.count({ c,ne }) and not bridges.count({ ne,c })) 
+		{
 			dfs_comp(ne);
 		}
 	}
