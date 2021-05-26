@@ -1,3 +1,5 @@
+// finds bridges and creates a compressed graph 
+// can count multiple edges as a bridge, so fix that if necessary
 #include<bits/stdc++.h>
 using namespace std;
 
